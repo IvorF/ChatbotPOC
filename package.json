@@ -26,6 +26,7 @@
     "@types/restify": "^4.3.4",
     "botbuilder": "^3.8.4",
     "dotenv-extended": "^2.4.0",
+    "node-fetch": "^2.5.0",
     "restify": "^5.0.0",
     "typescript": "^2.4.1"
   }

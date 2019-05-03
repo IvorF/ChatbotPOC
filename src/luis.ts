@@ -4,12 +4,77 @@
 import * as builder from "botbuilder";
 import * as restify from "restify";
 
+const fetch = require("node-fetch");
+
 require("dotenv-extended").load();
 
 function normalizeAndStoreData(sess: builder.Session, args: any): void {
     sess.dialogData.name = builder.EntityRecognizer.findEntity(args.intent.entities, "Name");
     sess.dialogData.product = builder.EntityRecognizer.findEntity(args.intent.entities, "Product");
     sess.dialogData.number = builder.EntityRecognizer.findEntity(args.intent.entities, "builtin.number");
+}
+
+function postNewUtterance(text, intent) {
+    let intent1 = intent.intents[0].score
+    let intent2 = intent.intents[1].score
+    let extract = intent1 - intent2
+    console.log("----intent1-------")
+    console.log(intent1, "name:", intent.intents[0].intent)
+    console.log("------intent2-----")
+    console.log(intent2, "name:", intent.intents[1].intent)
+    console.log("------extract-----")
+    console.log(extract)
+
+    console.log("------put new utterance?-----")
+    if (extract > 0.5) {
+        console.log("YES")
+    } else {
+        console.log("NO")
+    }
+
+    console.log("----text-------")
+    console.log(text)
+    console.log("------intentname-----")
+    console.log(intent.intents[0].intent)
+    console.log("-----entities------")
+    console.log(intent.entities)
+    console.log("-----type------3")
+    console.log(intent.entities[0].type)
+    console.log("-------startIndex----3")
+    console.log(intent.entities[0].startIndex)
+    console.log("-----endIndex------3")
+    console.log(intent.entities[0].endIndex)
+
+    fetch('https://westus.api.cognitive.microsoft.com/luis/api/v2.0/apps/3480e277-67b8-4cb9-af10-f7db6ce55d63/versions/0.1/example', {
+        method: 'POST',
+        // body: JSON.stringify({
+        // 	productId: this.props.product.id
+        // }),
+        body: JSON.stringify({
+            "text": text,
+            "intentName": intent.intents[0].intent,
+            "entityLabels": [
+                {
+                    "entityName": "number",
+                    "startCharIndex": intent.entities[0].startIndex,
+                    "endCharIndex": intent.entities[0].endIndex
+                }
+            ]
+        }),
+        headers: {
+            'Content-type': 'application/json',
+            'Ocp-Apim-Subscription-Key': '269d75ce64994b56974a933db9b0eade'
+        }
+    })
+        .then((res: Response) => {
+            return res.json();
+        })
+        .then((json) => {
+            console.log('#############################')
+            console.log('Result fetch', json);
+            console.log('#############################')
+        })
+        .catch(() => console.log('Calling POST example has crashed'));
 }
 
 function logIntents(args: any): void {
@@ -34,6 +99,7 @@ server.post("/api/messages", conn.listen());
 
 bot.dialog("/addMore", (sess, args) => {
     normalizeAndStoreData(sess, args);
+    postNewUtterance(sess.message.text, args.intent)
     sess.send(`You need the "${args.intent.intent}" intent ${sess.dialogData.number === null ? '' : 'met entity ' + sess.dialogData.number.entity}`);
 }).triggerAction({
     matches: "AddMore"
