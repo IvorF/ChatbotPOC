@@ -18,12 +18,6 @@ function postNewUtterance(text, intent) {
     let intent1 = intent.intents[0].score
     let intent2 = intent.intents[1].score
     let extract = intent1 - intent2
-    console.log("----intent1-------")
-    console.log(intent1, "name:", intent.intents[0].intent)
-    console.log("------intent2-----")
-    console.log(intent2, "name:", intent.intents[1].intent)
-    console.log("------extract-----")
-    console.log(extract)
 
     console.log("------put new utterance?-----")
     if (extract > 0.5) {
@@ -54,28 +48,6 @@ function postNewUtterance(text, intent) {
     } else {
         console.log("NO")
     }
-
-    // console.log("----text-------")
-    // console.log(text)
-    // console.log("------intentname-----")
-    // console.log(intent.intents[0].intent)
-    // console.log("-----entities------")
-    // console.log(intent.entities)
-    // console.log("-----type------3")
-    // console.log(intent.entities[0].type)
-    // console.log("-------startIndex----3")
-    // console.log(intent.entities[0].startIndex)
-    // console.log("-----endIndex------3")
-    // console.log(intent.entities[0].endIndex)
-
-    // console.log("-----entities------3")
-    // for (let entity of intent.entities) {
-    //     console.log({
-    //         "entityName": entity.type.replace("builtin.", ""),
-    //         "startCharIndex": entity.startIndex,
-    //         "endCharIndex": entity.endIndex
-    //     })
-    // }
 }
 
 function getEntities(entities) {
@@ -88,7 +60,6 @@ function getEntities(entities) {
         }
         res += ","
     }
-    res += ""
     console.log("RES", res)
     return res
 }
@@ -124,7 +95,6 @@ bot.dialog("/addMore", (sess, args) => {
 bot.dialog("/clearBasket", (sess, args) => {
     postNewUtterance(sess.message.text, args.intent)
     sess.send("Your cart is now empty");
-    //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
     matches: "ClearBasket"
 });
@@ -155,7 +125,6 @@ bot.dialog("/greeting", (sess, args) => {
     postNewUtterance(sess.message.text, args.intent)
     normalizeAndStoreData(sess, args);
     sess.send(`Hello ${sess.dialogData.name === null ? '' : '"' + sess.dialogData.name.entity + '"'}`)
-    //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
     matches: "Greeting"
 });
@@ -163,7 +132,6 @@ bot.dialog("/greeting", (sess, args) => {
 bot.dialog("/help", (sess, args) => {
     postNewUtterance(sess.message.text, args.intent)
     sess.send("I will send help!")
-    //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
     matches: "Help"
 });
@@ -171,7 +139,6 @@ bot.dialog("/help", (sess, args) => {
 bot.dialog("/joke", (sess, args) => {
     postNewUtterance(sess.message.text, args.intent)
     sess.send("This might make you laugh. How do robots eat guacamole? With computer chips.")
-    //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
     matches: "Joke"
 });
@@ -187,7 +154,6 @@ bot.dialog("/removeMore", (sess, args) => {
     postNewUtterance(sess.message.text, args.intent)
     normalizeAndStoreData(sess, args);
     sess.send(`This item will be deleted ${sess.dialogData.number === null ? '' : '"' + sess.dialogData.number.entity + '"' + " times"}`);
-    //sess.send(`You need the "${args.intent.intent}" intent ${sess.dialogData.number === null ? '' : 'with entity ' + '"' + sess.dialogData.number.entity + '"'}`);
 }).triggerAction({
     matches: "RemoveMore"
 });
@@ -195,7 +161,7 @@ bot.dialog("/removeMore", (sess, args) => {
 bot.dialog("/showBasket", (sess, args) => {
     postNewUtterance(sess.message.text, args.intent)
     sess.send("I will show you your basket")
-    //sess.send(`You need the "${args.intent.intent}" intent`);
+
 }).triggerAction({
     matches: "ShowBasket"
 });
@@ -203,7 +169,6 @@ bot.dialog("/showBasket", (sess, args) => {
 bot.dialog("/showProfile", (sess, args) => {
     postNewUtterance(sess.message.text, args.intent)
     sess.send("I will show you your profile")
-    //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
     matches: "ShowProfile"
 });
@@ -211,7 +176,6 @@ bot.dialog("/showProfile", (sess, args) => {
 bot.dialog("/stop", (sess, args) => {
     postNewUtterance(sess.message.text, args.intent)
     sess.send("Ok, I'll quit")
-    //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
     matches: "Stop"
 });
@@ -219,76 +183,6 @@ bot.dialog("/stop", (sess, args) => {
 bot.dialog("/updateProfile", (sess, args) => {
     postNewUtterance(sess.message.text, args.intent)
     sess.send("I can update that")
-    //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
     matches: "UpdateProfile"
 });
-
-// bot.dialog("/", [
-//     (sess, args, next) => {
-//         sess.userData.arrival = undefined;
-//         sess.userData.departure = undefined;
-//         if (!sess.userData.name) {
-//             sess.beginDialog("/profile");
-//         }
-//         else {
-//             next();
-//         }
-//     },
-//     (sess, result) => {
-//         sess.send(`Hello ${sess.userData.name}! What may I help you with?`);
-//     }
-// ]);
-
-// bot.dialog("/departure", [
-//     (sess, args, next) => {
-//         builder.Prompts.text(sess, "What is your departure city?");
-//     },
-//     (sess, result) => {
-//         sess.userData.departure = result.reponse;
-//         sess.endDialog();
-//     }
-// ]);
-
-// bot.dialog("/arrival", [
-//     (sess, args, next) => {
-//         builder.Prompts.text(sess, "What is your arrival city?");
-//     },
-//     (sess, result) => {
-//         sess.userData.arrival = result.reponse;
-//         sess.endDialog();
-//     }
-// ]);
-
-// bot.dialog("/profile", [
-//     (sess, args, next) => {
-//         builder.Prompts.text(sess, "Hello, user! What is your name");
-//     },
-//     (sess, result) => {
-//         sess.userData.name = result.response;
-//         sess.endDialog();
-//     }
-// ]);
-
-// bot.dialog("/noresults", [
-//     (sess, args, next) => {
-//         if (args && args.entry && args.entry === "dialog") {
-//             builder.Prompts.choice(sess, "Sorry. No results were found. :( Would you like to try again?", [
-//                 "Yes"
-//                 , "No"
-//             ]);
-//         }
-//         else {
-//             sess.send("Oh hey! You're back! Let's start this over.");
-//             sess.replaceDialog("/");
-//         }
-//     },
-//     (sess, result) => {
-//         if (result.response.entity === "Yes") {
-//             sess.replaceDialog("/");
-//         }
-//         else {
-//             sess.send("Okay, bye!");
-//         }
-//     }
-// ]);
