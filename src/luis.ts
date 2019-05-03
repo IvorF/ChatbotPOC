@@ -28,53 +28,69 @@ function postNewUtterance(text, intent) {
     console.log("------put new utterance?-----")
     if (extract > 0.5) {
         console.log("YES")
+        fetch('https://westus.api.cognitive.microsoft.com/luis/api/v2.0/apps/3480e277-67b8-4cb9-af10-f7db6ce55d63/versions/0.1/example', {
+            method: 'POST',
+            body: JSON.stringify({
+                "text": text,
+                "intentName": intent.intents[0].intent,
+                "entityLabels": [
+                    getEntities(intent.entities),
+                ]
+            }),
+            headers: {
+                'Content-type': 'application/json',
+                'Ocp-Apim-Subscription-Key': '269d75ce64994b56974a933db9b0eade'
+            }
+        })
+            .then((res: Response) => {
+                return res.json();
+            })
+            .then((json) => {
+                console.log('#############################')
+                console.log('Result fetch', json);
+                console.log('#############################')
+            })
+            .catch(() => console.log('Calling POST example has crashed'));
     } else {
         console.log("NO")
     }
 
-    console.log("----text-------")
-    console.log(text)
-    console.log("------intentname-----")
-    console.log(intent.intents[0].intent)
-    console.log("-----entities------")
-    console.log(intent.entities)
-    console.log("-----type------3")
-    console.log(intent.entities[0].type)
-    console.log("-------startIndex----3")
-    console.log(intent.entities[0].startIndex)
-    console.log("-----endIndex------3")
-    console.log(intent.entities[0].endIndex)
+    // console.log("----text-------")
+    // console.log(text)
+    // console.log("------intentname-----")
+    // console.log(intent.intents[0].intent)
+    // console.log("-----entities------")
+    // console.log(intent.entities)
+    // console.log("-----type------3")
+    // console.log(intent.entities[0].type)
+    // console.log("-------startIndex----3")
+    // console.log(intent.entities[0].startIndex)
+    // console.log("-----endIndex------3")
+    // console.log(intent.entities[0].endIndex)
 
-    fetch('https://westus.api.cognitive.microsoft.com/luis/api/v2.0/apps/3480e277-67b8-4cb9-af10-f7db6ce55d63/versions/0.1/example', {
-        method: 'POST',
-        // body: JSON.stringify({
-        // 	productId: this.props.product.id
-        // }),
-        body: JSON.stringify({
-            "text": text,
-            "intentName": intent.intents[0].intent,
-            "entityLabels": [
-                {
-                    "entityName": "number",
-                    "startCharIndex": intent.entities[0].startIndex,
-                    "endCharIndex": intent.entities[0].endIndex
-                }
-            ]
-        }),
-        headers: {
-            'Content-type': 'application/json',
-            'Ocp-Apim-Subscription-Key': '269d75ce64994b56974a933db9b0eade'
+    // console.log("-----entities------3")
+    // for (let entity of intent.entities) {
+    //     console.log({
+    //         "entityName": entity.type.replace("builtin.", ""),
+    //         "startCharIndex": entity.startIndex,
+    //         "endCharIndex": entity.endIndex
+    //     })
+    // }
+}
+
+function getEntities(entities) {
+    let res
+    for (let entity of entities) {
+        res += {
+            "entityName": entity.type.replace("builtin.", ""),
+            "startCharIndex": entity.startIndex,
+            "endCharIndex": entity.endIndex
         }
-    })
-        .then((res: Response) => {
-            return res.json();
-        })
-        .then((json) => {
-            console.log('#############################')
-            console.log('Result fetch', json);
-            console.log('#############################')
-        })
-        .catch(() => console.log('Calling POST example has crashed'));
+        res += ","
+    }
+    res += ""
+    console.log("RES", res)
+    return res
 }
 
 function logIntents(args: any): void {
@@ -106,7 +122,7 @@ bot.dialog("/addMore", (sess, args) => {
 });
 
 bot.dialog("/clearBasket", (sess, args) => {
-    logIntents(args);
+    postNewUtterance(sess.message.text, args.intent)
     sess.send("Your cart is now empty");
     //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
@@ -114,20 +130,21 @@ bot.dialog("/clearBasket", (sess, args) => {
 });
 
 bot.dialog("/curse", (sess, args) => {
-    logIntents(args);
+    postNewUtterance(sess.message.text, args.intent)
     sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
     matches: "Curse"
 });
 
 bot.dialog("/deleteItem", (sess, args) => {
-    logIntents(args);
+    postNewUtterance(sess.message.text, args.intent)
     sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
     matches: "DeleteItem"
 });
 
 bot.dialog("/findItem", (sess, args) => {
+    postNewUtterance(sess.message.text, args.intent)
     normalizeAndStoreData(sess, args);
     sess.send(`You need the "${args.intent.intent}" intent ${sess.dialogData.product === null ? '' : 'with entity ' + '"' + sess.dialogData.product.entity + '"'} ${sess.dialogData.number === null ? '' : 'and amount ' + '"' + sess.dialogData.number.entity + '"'}`);
 }).triggerAction({
@@ -135,6 +152,7 @@ bot.dialog("/findItem", (sess, args) => {
 });
 
 bot.dialog("/greeting", (sess, args) => {
+    postNewUtterance(sess.message.text, args.intent)
     normalizeAndStoreData(sess, args);
     sess.send(`Hello ${sess.dialogData.name === null ? '' : '"' + sess.dialogData.name.entity + '"'}`)
     //sess.send(`You need the "${args.intent.intent}" intent`);
@@ -143,6 +161,7 @@ bot.dialog("/greeting", (sess, args) => {
 });
 
 bot.dialog("/help", (sess, args) => {
+    postNewUtterance(sess.message.text, args.intent)
     sess.send("I will send help!")
     //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
@@ -150,7 +169,7 @@ bot.dialog("/help", (sess, args) => {
 });
 
 bot.dialog("/joke", (sess, args) => {
-    logIntents(args);
+    postNewUtterance(sess.message.text, args.intent)
     sess.send("This might make you laugh. How do robots eat guacamole? With computer chips.")
     //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
@@ -158,14 +177,14 @@ bot.dialog("/joke", (sess, args) => {
 });
 
 bot.dialog("/none", (sess, args) => {
-    logIntents(args);
+    postNewUtterance(sess.message.text, args.intent)
     sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
     matches: "None"
 });
 
 bot.dialog("/removeMore", (sess, args) => {
-    logIntents(args);
+    postNewUtterance(sess.message.text, args.intent)
     normalizeAndStoreData(sess, args);
     sess.send(`This item will be deleted ${sess.dialogData.number === null ? '' : '"' + sess.dialogData.number.entity + '"' + " times"}`);
     //sess.send(`You need the "${args.intent.intent}" intent ${sess.dialogData.number === null ? '' : 'with entity ' + '"' + sess.dialogData.number.entity + '"'}`);
@@ -174,7 +193,7 @@ bot.dialog("/removeMore", (sess, args) => {
 });
 
 bot.dialog("/showBasket", (sess, args) => {
-    logIntents(args);
+    postNewUtterance(sess.message.text, args.intent)
     sess.send("I will show you your basket")
     //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
@@ -182,7 +201,7 @@ bot.dialog("/showBasket", (sess, args) => {
 });
 
 bot.dialog("/showProfile", (sess, args) => {
-    logIntents(args);
+    postNewUtterance(sess.message.text, args.intent)
     sess.send("I will show you your profile")
     //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
@@ -190,7 +209,7 @@ bot.dialog("/showProfile", (sess, args) => {
 });
 
 bot.dialog("/stop", (sess, args) => {
-    logIntents(args);
+    postNewUtterance(sess.message.text, args.intent)
     sess.send("Ok, I'll quit")
     //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
@@ -198,7 +217,7 @@ bot.dialog("/stop", (sess, args) => {
 });
 
 bot.dialog("/updateProfile", (sess, args) => {
-    logIntents(args);
+    postNewUtterance(sess.message.text, args.intent)
     sess.send("I can update that")
     //sess.send(`You need the "${args.intent.intent}" intent`);
 }).triggerAction({
@@ -221,55 +240,55 @@ bot.dialog("/updateProfile", (sess, args) => {
 //     }
 // ]);
 
-bot.dialog("/departure", [
-    (sess, args, next) => {
-        builder.Prompts.text(sess, "What is your departure city?");
-    },
-    (sess, result) => {
-        sess.userData.departure = result.reponse;
-        sess.endDialog();
-    }
-]);
+// bot.dialog("/departure", [
+//     (sess, args, next) => {
+//         builder.Prompts.text(sess, "What is your departure city?");
+//     },
+//     (sess, result) => {
+//         sess.userData.departure = result.reponse;
+//         sess.endDialog();
+//     }
+// ]);
 
-bot.dialog("/arrival", [
-    (sess, args, next) => {
-        builder.Prompts.text(sess, "What is your arrival city?");
-    },
-    (sess, result) => {
-        sess.userData.arrival = result.reponse;
-        sess.endDialog();
-    }
-]);
+// bot.dialog("/arrival", [
+//     (sess, args, next) => {
+//         builder.Prompts.text(sess, "What is your arrival city?");
+//     },
+//     (sess, result) => {
+//         sess.userData.arrival = result.reponse;
+//         sess.endDialog();
+//     }
+// ]);
 
-bot.dialog("/profile", [
-    (sess, args, next) => {
-        builder.Prompts.text(sess, "Hello, user! What is your name");
-    },
-    (sess, result) => {
-        sess.userData.name = result.response;
-        sess.endDialog();
-    }
-]);
+// bot.dialog("/profile", [
+//     (sess, args, next) => {
+//         builder.Prompts.text(sess, "Hello, user! What is your name");
+//     },
+//     (sess, result) => {
+//         sess.userData.name = result.response;
+//         sess.endDialog();
+//     }
+// ]);
 
-bot.dialog("/noresults", [
-    (sess, args, next) => {
-        if (args && args.entry && args.entry === "dialog") {
-            builder.Prompts.choice(sess, "Sorry. No results were found. :( Would you like to try again?", [
-                "Yes"
-                , "No"
-            ]);
-        }
-        else {
-            sess.send("Oh hey! You're back! Let's start this over.");
-            sess.replaceDialog("/");
-        }
-    },
-    (sess, result) => {
-        if (result.response.entity === "Yes") {
-            sess.replaceDialog("/");
-        }
-        else {
-            sess.send("Okay, bye!");
-        }
-    }
-]);
+// bot.dialog("/noresults", [
+//     (sess, args, next) => {
+//         if (args && args.entry && args.entry === "dialog") {
+//             builder.Prompts.choice(sess, "Sorry. No results were found. :( Would you like to try again?", [
+//                 "Yes"
+//                 , "No"
+//             ]);
+//         }
+//         else {
+//             sess.send("Oh hey! You're back! Let's start this over.");
+//             sess.replaceDialog("/");
+//         }
+//     },
+//     (sess, result) => {
+//         if (result.response.entity === "Yes") {
+//             sess.replaceDialog("/");
+//         }
+//         else {
+//             sess.send("Okay, bye!");
+//         }
+//     }
+// ]);
